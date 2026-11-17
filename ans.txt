@@ -1,0 +1,358 @@
+AI Lab Test – Complete Solutions (17 November 2026)
+Below are the complete solutions to both questions from your uploaded test paper, including predicate representations, FOL expressions, goal-stack planning, logical justification, and forward-chaining derivation.
+
+Q1. Blocks World – Predicate Representation and Goal Stack
+1. Define the predicates
+We use the following standard Blocks World predicates:
+Predicate	Meaning
+OnTable(x)	Block x is on the table
+On(x,y)	Block x is on block y
+Clear(x)	No block is placed on x
+Holding(x)	Robot is holding block x
+HandEmpty	Robot's hand is empty
+
+The standard STRIPS actions are:
+
+Action 1: PICKUP(x)
+
+Preconditions:
+- OnTable(x)
+- Clear(x)
+- HandEmpty
+Effects:
+- Add: Holding(x)
+- Delete: OnTable(x), Clear(x), HandEmpty
+Action 2: PUTDOWN(x)
+
+Precondition:
+
+- Holding(x)
+
+Effects:
+- Add: OnTable(x), Clear(x), HandEmpty
+- Delete: Holding(x)
+Action 3: STACK(x,y)
+
+Preconditions:
+- Holding(x)
+- Clear(y)
+Effects:
+- Add: On(x,y), Clear(x), HandEmpty
+- Delete: Holding(x), Clear(y)
+Action 4: UNSTACK(x,y)
+
+Preconditions:
+- On(x,y)
+- Clear(x)
+- HandEmpty
+Effects:
+- Add: Holding(x), Clear(y)
+- Delete: On(x,y), Clear(x), HandEmpty
+2. Initial state
+All four blocks A, B, C and D are on the table.
+\[
+I = \{
+OnTable(A), OnTable(B),
+OnTable(C), OnTable(D),
+\]
+
+\[
+Clear(A), Clear(B), Clear(C), Clear(D),
+HandEmpty
+\}
+\]
+
+3. Goal state
+- A must be placed over C.
+- D must be placed over B.
+\[
+G = \{On(A,C), On(D,B)\}
+\]
+
+The desired final arrangement is:
+
+
+
+
+
+
+
+
+
+
+Stack 1: A on C
+
+
+
+
+
+
+
+
+
+
+
+Stack 2: D on B
+
+
+4. Goal Stack Planning
+We can achieve both goals independently because all four blocks initially lie on the table.
+
+Step-by-step execution:
+Step	Action	Result
+1	PICKUP(A)	Holding(A)
+2	STACK(A,C)	On(A,C)
+3	PICKUP(D)	Holding(D)
+4	STACK(D,B)	On(D,B)
+
+Final state:
+\[
+\begin{aligned}
+S_f = \{&
+On(A,C), On(D,B),\\
+&OnTable(B), OnTable(C),\\
+&Clear(A), Clear(D), HandEmpty
+\}
+\end{aligned}
+\]
+
+5. Goal Stack (LIFO representation)
+Initially push the goals:
+On(A,C)
+On(D,B)
+
+
+Expanding the goals into actions gives the following execution sequence:
+PICKUP(A)
+STACK(A,C)
+PICKUP(D)
+STACK(D,B)
+
+
+Goal achieved
+Both goal predicates are satisfied, and the robot's hand is empty.
+
+Q2. Knowledge-Based System – First-Order Logic
+(i) Represent all four university policies using FOL
+We need to translate each university policy into First-Order Logic.
+
+Policy 1: Every student studies at least one course.
+\[
+\boxed{
+\forall x(Student(x)\rightarrow
+\exists y(Course(y)\land Studies(x,y)))
+}
+\]
+
+Explanation: For every student x, there exists at least one course y such that x studies y.
+
+Policy 2: A student who studies and passes the same course is qualified for research.
+\[
+\boxed{
+\forall x\forall y[
+(Student(x)\land Course(y)\land
+Studies(x,y)\land Passed(x,y))
+\rightarrow Qualified(x)
+]
+}
+\]
+
+Explanation: If a student studies a course and passes that same course, the student becomes qualified for research.
+
+Policy 3: A qualified student supervised by a professor is a researcher.
+\[
+\boxed{
+\forall x\forall y[
+(Qualified(x)\land Professor(y)\land
+Supervises(y,x))
+\rightarrow Researcher(x)
+]
+}
+\]
+
+Explanation: If a student is qualified and a professor supervises that student, the student is considered a researcher.
+
+Policy 4: Every researcher is eligible for a research fellowship.
+\[
+\boxed{
+\forall x(Researcher(x)\rightarrow Eligible(x))
+}
+\]
+
+Explanation: Every researcher is eligible for the fellowship.
+
+(ii) Does the given statement imply that every student studies the same course? Can we conclude that every student studies AI?
+Given:
+\[
+\forall x(Student(x)\rightarrow
+\exists y(Course(y)\land Studies(x,y)))
+\]
+
+Answer 1: Does every student study the same course?
+
+No.
+
+The existential quantifier \(\exists y\) is inside the universal quantifier \(\forall x\).
+
+This means that for every student, there exists at least one course that the particular student studies. The course can be different for different students.
+
+For example:
+- Ravi studies AI.
+- Anu studies ML.
+Both satisfy the given statement, even though they study different courses.
+
+Answer 2: Can we conclude that every student studies AI?
+
+No.
+
+The statement only guarantees that every student studies at least one course. It does not specify which course.
+
+From the given knowledge base:
+\[
+Studies(Ravi,AI)
+\]
+
+\[
+Studies(Anu,ML)
+\]
+
+Therefore, we cannot conclude:
+\[
+\boxed{\forall x(Student(x)\rightarrow Studies(x,AI))}
+\]
+
+Final conclusion:
+1. Every student studies at least one course.
+2. Different students can study different courses.
+3. We cannot conclude that every student studies AI.
+
+(iii) Determine whether Eligible(Ravi) can be derived
+We will use Forward Chaining to derive the result.
+
+Forward chaining starts with known facts and repeatedly applies rules to generate new facts until the required conclusion is obtained.
+Step 1: Initial knowledge base
+Given facts:
+Student(Ravi)
+Student(Anu)
+Course(AI)
+Course(ML)
+
+Studies(Ravi, AI)
+Passed(Ravi, AI)
+Studies(Anu, ML)
+
+Professor(DrSharma)
+Supervises(DrSharma, Ravi)
+
+
+Step 2: Apply Rule 2 – Qualified
+Rule:
+\[
+\begin{aligned}
+&Student(x)\land Course(y)\\
+&\land Studies(x,y)\land Passed(x,y)\\
+&\rightarrow Qualified(x)
+\end{aligned}
+\]
+
+Substitute:
+\[
+x=Ravi,\quad y=AI
+\]
+
+Check the facts:
+- Student(Ravi) ✓
+- Course(AI) ✓
+- Studies(Ravi, AI) ✓
+- Passed(Ravi, AI) ✓
+All conditions are satisfied.
+
+Therefore, derive:
+\[
+\boxed{Qualified(Ravi)}
+\]
+
+Step 3: Apply Rule 3 – Researcher
+Rule:
+\[
+\begin{aligned}
+&Qualified(x)\land Professor(y)\\
+&\land Supervises(y,x)\\
+&\rightarrow Researcher(x)
+\end{aligned}
+\]
+
+Substitute:
+\[
+x=Ravi,\quad y=DrSharma
+\]
+
+Check the facts:
+- Qualified(Ravi) ✓
+- Professor(DrSharma) ✓
+- Supervises(DrSharma, Ravi) ✓
+All conditions are satisfied.
+
+Therefore, derive:
+\[
+\boxed{Researcher(Ravi)}
+\]
+
+Step 4: Apply Rule 4 – Eligible
+Rule:
+\[
+Researcher(x)\rightarrow Eligible(x)
+\]
+
+Substitute:
+\[
+x=Ravi
+\]
+
+Since Researcher(Ravi) is already established:
+\[
+\boxed{Eligible(Ravi)}
+\]
+
+Conclusion derived
+Step 5: Complete Forward Chaining Table
+Step	Applied rule	Newly generated fact
+1	Rule 2	Qualified(Ravi)
+2	Rule 3	Researcher(Ravi)
+3	Rule 4	Eligible(Ravi)
+
+Step 6: Final inference chain
+Given facts
+
+Student(Ravi), Course(AI)
+
+Studies(Ravi, AI), Passed(Ravi, AI)
+
+RULE 2
+Qualified(Ravi)
+
+RULE 3 + PROFESSOR FACTS
+Researcher(Ravi)
+
+RULE 4
+Eligible(Ravi)
+Final Answer
+
+
+Hence,
+\[
+\boxed{KB \models Eligible(Ravi)}
+\]
+
+Yes, Ravi is eligible for a research fellowship.
+
+Final Answer Summary
+Question	Result
+Q1	Goal achieved: A on C and D on B
+Q2 (i)	All four policies represented using FOL
+Q2 (ii)	No, students need not study the same course; cannot conclude everyone studies AI
+Q2 (iii)	Yes, Eligible(Ravi) is derived through forward chaining
+
+Important: The first policy is already represented by the statement in Q2(ii). The facts for Anu also satisfy the course requirement, but there is no Passed(Anu, ML) fact, so we cannot derive Qualified(Anu).
+
+The solutions cover both pages of your uploaded test paper.
